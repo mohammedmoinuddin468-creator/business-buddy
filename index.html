@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Business Buddy!! — Your business, packed into one AI panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0E0E12;
+    --bg-raised: #16161C;
+    --bg-inset: #0A0A0D;
+    --border: #26262F;
+    --border-soft: #1C1C23;
+    --text: #F1EFEA;
+    --text-muted: #93919C;
+    --text-faint: #5C5A66;
+    --violet: #7A67F0;
+    --violet-dim: #4C3FA0;
+    --marigold: #F2A93B;
+    --green: #4ADE80;
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --max: 1180px;
+  }
+
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .display {
+    font-family: 'Space Grotesk', 'Inter', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  a { color: inherit; }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 20px; }
+  }
+
+  /* ---------- Nav ---------- */
+  nav {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 40;
+    background: rgba(14,14,18,0.82);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight: 600;
+  }
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--violet), #4C3FA0);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+  .brand-mark svg { width: 14px; height: 14px; }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 18px;
+    background: var(--text);
+    color: var(--bg);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: 76px 0 90px;
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 56px;
+    align-items: center;
+  }
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 44px 0 56px; gap: 40px; }
+  }
+
+  .kicker {
+    color: var(--marigold);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.06;
+    max-width: 15ch;
+  }
+  .hero p.lede {
+    margin-top: 22px;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    max-width: 46ch;
+  }
+  .hero-actions {
+    margin-top: 34px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 26px;
+    background: var(--violet);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .btn-primary:hover { background: #8A78F5; transform: translateY(-1px); }
+  .btn-primary:focus-visible { outline: 2px solid var(--marigold); outline-offset: 3px; }
+
+  .hero-note {
+    font-size: 13.5px;
+    color: var(--text-faint);
+  }
+
+  /* Console panel */
+  .panel {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .panel-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+  .panel-head span {
+    margin-left: 6px;
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+  .panel-body { padding: 22px; }
+  .panel-label {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin-bottom: 10px;
+  }
+  #biz-input {
+    width: 100%;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    padding: 13px 14px;
+    resize: none;
+    line-height: 1.5;
+  }
+  #biz-input:focus-visible { outline: 2px solid var(--violet); outline-offset: 2px; }
+
+  .generate-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .btn-generate {
+    flex-shrink: 0;
+    background: var(--violet);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 11px 18px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-generate:hover { background: #8A78F5; }
+  .btn-generate:disabled { opacity: 0.55; cursor: wait; }
+  .gen-status {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .readout {
+    margin-top: 20px;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 18px;
+    display: none;
+  }
+  .readout.show { display: block; }
+  .readout-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 13.5px;
+    opacity: 0;
+    transform: translateY(4px);
+    animation: rise 0.4s ease forwards;
+  }
+  @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  .readout-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+    margin-top: 6px;
+    flex-shrink: 0;
+    box-shadow: 0 0 6px rgba(74,222,128,0.7);
+  }
+  .readout-row b { font-weight: 600; color: var(--text); }
+  .readout-row span.detail { color: var(--text-muted); display: block; margin-top: 2px; }
+
+  .pdf-row {
+    margin-top: 18px;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-soft);
+  }
+  .pdf-row.show { display: flex; }
+  .pdf-row .pdf-meta { font-size: 12.5px; color: var(--text-faint); }
+  .btn-pdf {
+    background: transparent;
+    border: 1px solid var(--marigold);
+    color: var(--marigold);
+    border-radius: var(--radius-sm);
+    padding: 10px 16px;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-pdf:hover { background: rgba(242,169,59,0.1); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .readout-row { animation: none; opacity: 1; transform: none; }
+    .btn-primary, .btn-generate { transition: none; }
+  }
+
+  /* ---------- Section shell ---------- */
+  section { padding: 84px 0; border-top: 1px solid var(--border-soft); }
+  .section-head { max-width: 56ch; margin-bottom: 48px; }
+  .section-head h2 { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; }
+  .section-head p { margin-top: 14px; color: var(--text-muted); font-size: 15.5px; line-height: 1.6; }
+
+  /* ---------- Outputs list (control-panel indicator rows) ---------- */
+  .outputs-panel {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 8px;
+  }
+  .outputs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  @media (max-width: 720px) {
+    .outputs-grid { grid-template-columns: 1fr; }
+  }
+  .out-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 17px 18px;
+    border-radius: var(--radius-md);
+  }
+  .out-row:hover { background: var(--bg-inset); }
+  .out-led {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--violet);
+    box-shadow: 0 0 8px rgba(122,103,240,0.65);
+    flex-shrink: 0;
+  }
+  .out-text b { display: block; font-size: 14.5px; font-weight: 500; }
+  .out-text span { font-size: 12.5px; color: var(--text-faint); }
+
+  /* ---------- PDF feature ---------- */
+  .pdf-section { display: grid; grid-template-columns: 1fr 0.85fr; gap: 56px; align-items: center; }
+  @media (max-width: 900px) { .pdf-section { grid-template-columns: 1fr; } }
+  .pdf-copy p.lede { color: var(--text-muted); font-size: 15.5px; line-height: 1.65; margin-top: 16px; max-width: 44ch; }
+  .pdf-callout {
+    margin-top: 24px;
+    padding: 14px 16px;
+    background: rgba(242,169,59,0.08);
+    border: 1px solid rgba(242,169,59,0.35);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: #E9C583;
+  }
+  .doc-mock {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 26px 26px 22px;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  .doc-mock::before {
+    content: "";
+    position: absolute;
+    top: 0; right: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 22px 22px 0;
+    border-color: transparent var(--bg-inset) transparent transparent;
+    border-radius: 0 var(--radius-md) 0 0;
+  }
+  .doc-mock-title { font-size: 12px; color: var(--text-faint); margin-bottom: 4px; }
+  .doc-mock-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 18px; }
+  .doc-mock-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .doc-mock-line span.tick { color: var(--green); font-size: 13px; }
+  .doc-mock-footer {
+    margin-top: 16px;
+    font-size: 10.5px;
+    color: var(--text-faint);
+    font-family: 'JetBrains Mono', monospace;
+    text-align: center;
+  }
+
+  /* ---------- Diagram ---------- */
+  .diagram-wrap {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(24px, 4vw, 48px);
+    overflow-x: auto;
+  }
+  .diagram-svg { width: 100%; height: auto; min-width: 640px; display: block; margin: 0 auto; }
+
+  .interesting-lede {
+    max-width: 60ch;
+    color: var(--text-muted);
+    font-size: 15.5px;
+    line-height: 1.65;
+    margin-top: 14px;
+  }
+
+  /* ---------- Pricing ---------- */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 860px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 30px 26px;
+    display: flex;
+    flex-direction: column;
+  }
+  .price-card.featured {
+    border-color: var(--violet);
+    box-shadow: 0 0 0 1px var(--violet), 0 18px 40px -18px rgba(122,103,240,0.5);
+    position: relative;
+  }
+  .price-card.featured .price-flag {
+    position: absolute;
+    top: -12px; left: 26px;
+    background: var(--violet);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .price-tier { font-size: 15px; color: var(--text-muted); margin-bottom: 10px; }
+  .price-amount { font-family: 'Space Grotesk', sans-serif; font-size: 34px; font-weight: 600; }
+  .price-amount sub { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400; color: var(--text-faint); }
+  .price-desc { margin-top: 10px; font-size: 13.5px; color: var(--text-muted); line-height: 1.5; min-height: 40px; }
+  .price-list { list-style: none; margin: 22px 0 0; padding: 0; flex-grow: 1; }
+  .price-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 13.5px;
+    color: var(--text);
+    padding: 8px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .price-list li:first-child { border-top: none; }
+  .price-list li .tick { color: var(--green); flex-shrink: 0; }
+  .price-cta {
+    margin-top: 24px;
+    text-align: center;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .price-card.featured .price-cta { background: var(--violet); border-color: var(--violet); color: #fff; }
+
+  /* ---------- Footer ---------- */
+  footer { padding: 64px 0 48px; }
+  .footer-cta {
+    background: linear-gradient(135deg, #1B1730, var(--bg-raised));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: clamp(30px, 5vw, 56px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 56px;
+  }
+  .footer-cta h3 { font-size: clamp(22px, 3vw, 28px); max-width: 20ch; }
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--text-faint);
+  }
+  .footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+  .footer-links a { text-decoration: none; color: var(--text-faint); }
+  .footer-links a:hover { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-inner">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="6" cy="12" r="2.4" fill="#fff"/>
+          <circle cx="12" cy="6" r="2.4" fill="#fff" opacity="0.85"/>
+          <circle cx="18" cy="12" r="2.4" fill="#fff" opacity="0.7"/>
+          <path d="M6 14.4V18M12 8.4V18M18 14.4V18" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </span>
+      Business Buddy!!
+    </div>
+    <a class="nav-cta" href="#demo">Try it free</a>
+  </div>
+</nav>
+
+<header class="wrap hero">
+  <div>
+    <div class="kicker">For small business owners</div>
+    <h1>AI Website for helping Small Businesses.</h1>
+    <p class="lede">Type one sentence about what you do. Business Buddy!! turns it into your website copy, ads, social posts, offers and more — the marketing toolkit you'd normally pay an agency for, ready in under a minute.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">
+        Try it free
+      </button>
+      <span class="hero-note">No credit card. First toolkit is on us.</span>
+    </div>
+  </div>
+
+  <div class="panel" id="demo">
+    <div class="panel-head">
+      <div class="panel-dot"></div><div class="panel-dot"></div><div class="panel-dot"></div>
+      <span>businessbuddy.app — new toolkit</span>
+    </div>
+    <div class="panel-body">
+      <div class="panel-label">Describe your business in one sentence</div>
+      <textarea id="biz-input" rows="2">I own a car battery shop in Bangalore.</textarea>
+      <div class="generate-row">
+        <button class="btn-generate" id="gen-btn" onclick="generateToolkit()">Generate my toolkit</button>
+        <span class="gen-status" id="gen-status"></span>
+      </div>
+
+      <div class="readout" id="readout"></div>
+
+      <div class="pdf-row" id="pdf-row">
+        <span class="pdf-meta">10 sections compiled and ready</span>
+        <button class="btn-pdf" onclick="downloadPdf()">Download PDF</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section id="outputs">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>One sentence in. A full toolkit out.</h2>
+      <p>Every toolkit covers the ten things most owners put off because they don't have the time, the words, or an agency on speed dial.</p>
+    </div>
+    <div class="outputs-panel">
+      <div class="outputs-grid" id="outputs-grid">
+        <!-- rows injected by JS from the same OUTPUT_DEFS used for generation, plus static fallback below for no-JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pdf-feature">
+  <div class="wrap pdf-section">
+    <div class="pdf-copy">
+      <h2>It doesn't stay on screen.</h2>
+      <p class="lede">Every generated toolkit compiles into one clean, branded PDF — your business name up top, a heading for each section, and a footer that says who made it. Print it, forward it, or hand it straight to whoever runs your ads.</p>
+      <div class="pdf-callout">Get it all in one downloadable PDF — ready to hand to your ad agency, printer, or team.</div>
+    </div>
+    <div class="doc-mock">
+      <div class="doc-mock-title">Toolkit report</div>
+      <div class="doc-mock-name" id="doc-mock-name">Your Business Name</div>
+      <div class="doc-mock-line"><span>Business description</span><span class="tick">✓</span></div>
+      <div class="doc-mock-line"><span>Google Ads copy</span><span class="tick">✓</span></div>
+      <div class="doc-mock-line"><span>Instagram captions</span><span class="tick">✓</span></div>
+      <div class="doc-mock-line"><span>WhatsApp messages</span><span class="tick">✓</span></div>
+      <div class="doc-mock-line"><span>SEO keywords</span><span class="tick">✓</span></div>
+      <div class="doc-mock-footer">Generated by Business Buddy!!</div>
+    </div>
+  </div>
+</section>
+
+<section id="interesting">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>This isn't a chatbot. It's your business, laid out.</h2>
+      <p class="interesting-lede">Everything Business Buddy!! writes plugs into one of three pillars — your website, your marketing, and where your leads actually come from. You get a working panel for the business, not a wall of chat history.</p>
+    </div>
+    <div class="diagram-wrap">
+      <svg class="diagram-svg" viewBox="0 0 900 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram showing My Business at the center branching into Website, Marketing and Leads, each with three sub-items">
+        <defs>
+          <marker id="dot" viewBox="0 0 6 6" refX="3" refY="3" markerWidth="6" markerHeight="6">
+            <circle cx="3" cy="3" r="2.4" fill="#3A3A46"/>
+          </marker>
+        </defs>
+
+        <!-- connecting lines: center to pillars -->
+        <path d="M450 210 C 380 210, 330 130, 230 96" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+        <path d="M450 210 L 450 96" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+        <path d="M450 210 C 520 210, 570 130, 670 96" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+
+        <!-- pillar to sub-item lines -->
+        <path d="M230 78 L 230 40" stroke="#232329" stroke-width="1.2"/>
+        <path d="M450 78 L 450 40" stroke="#232329" stroke-width="1.2"/>
+        <path d="M670 78 L 670 40" stroke="#232329" stroke-width="1.2"/>
+
+        <path d="M230 342 L 230 380" stroke="#232329" stroke-width="1.2"/>
+        <path d="M450 342 L 450 380" stroke="#232329" stroke-width="1.2"/>
+        <path d="M670 342 L 670 380" stroke="#232329" stroke-width="1.2"/>
+        <path d="M450 210 C 380 210, 330 300, 230 342" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+        <path d="M450 210 L 450 342" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+        <path d="M450 210 C 520 210, 570 300, 670 342" stroke="#2C2C36" stroke-width="1.6" fill="none"/>
+
+        <!-- center node -->
+        <circle cx="450" cy="210" r="52" fill="#1B1730" stroke="#7A67F0" stroke-width="1.6"/>
+        <text x="450" y="205" text-anchor="middle" fill="#F1EFEA" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600">MY</text>
+        <text x="450" y="223" text-anchor="middle" fill="#F1EFEA" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="600">BUSINESS</text>
+
+        <!-- top pillars: Website, Marketing, Leads -->
+        <g>
+          <rect x="178" y="78" width="104" height="34" rx="8" fill="#16161C" stroke="#3A3A46"/>
+          <text x="230" y="99.5" text-anchor="middle" fill="#F1EFEA" font-family="Inter, sans-serif" font-size="13" font-weight="600">Website</text>
+        </g>
+        <g>
+          <rect x="398" y="78" width="104" height="34" rx="8" fill="#16161C" stroke="#3A3A46"/>
+          <text x="450" y="99.5" text-anchor="middle" fill="#F1EFEA" font-family="Inter, sans-serif" font-size="13" font-weight="600">Marketing</text>
+        </g>
+        <g>
+          <rect x="618" y="78" width="104" height="34" rx="8" fill="#16161C" stroke="#3A3A46"/>
+          <text x="670" y="99.5" text-anchor="middle" fill="#F1EFEA" font-family="Inter, sans-serif" font-size="13" font-weight="600">Leads</text>
+        </g>
+
+        <!-- top sub-items above pillars -->
+        <text x="230" y="30" text-anchor="middle" fill="#8B899A" font-family="JetBrains Mono, monospace" font-size="11">SEO · FAQ · Blog</text>
+        <text x="450" y="30" text-anchor="middle" fill="#8B899A" font-family="JetBrains Mono, monospace" font-size="11">Google Ads · Instagram · Posters</text>
+        <text x="670" y="30" text-anchor="middle" fill="#8B899A" font-family="JetBrains Mono, monospace" font-size="11">WhatsApp · Customers · Follow-ups</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Pricing that fits a small shop's budget.</h2>
+      <p>Start where your business is. Move up when your marketing needs more hands.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">₹299<sub>/month</sub></div>
+        <div class="price-desc">For a business that just needs to get online and sound right.</div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>1 business profile</li>
+          <li><span class="tick">✓</span>Website copy &amp; business description</li>
+          <li><span class="tick">✓</span>SEO keywords &amp; FAQ</li>
+          <li><span class="tick">✓</span>5 PDF exports / month</li>
+        </ul>
+        <a class="price-cta" href="#demo">Get started</a>
+      </div>
+
+      <div class="price-card featured">
+        <span class="price-flag">Most owners pick this</span>
+        <div class="price-tier">Growth</div>
+        <div class="price-amount">₹599<sub>/month</sub></div>
+        <div class="price-desc">Everything to run ads, post daily, and reply to leads without a copywriter.</div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>Everything in Starter</li>
+          <li><span class="tick">✓</span>Google Ads &amp; Instagram captions</li>
+          <li><span class="tick">✓</span>WhatsApp promo messages</li>
+          <li><span class="tick">✓</span>Offers, poster text &amp; reviews</li>
+          <li><span class="tick">✓</span>Unlimited PDF exports</li>
+        </ul>
+        <a class="price-cta" href="#demo">Get started</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-tier">Pro</div>
+        <div class="price-amount">₹999<sub>/month</sub></div>
+        <div class="price-desc">For multiple outlets or brands, with priority regeneration.</div>
+        <ul class="price-list">
+          <li><span class="tick">✓</span>Everything in Growth</li>
+          <li><span class="tick">✓</span>Up to 5 business profiles</li>
+          <li><span class="tick">✓</span>Branded PDF with your logo</li>
+          <li><span class="tick">✓</span>Priority regeneration &amp; support</li>
+        </ul>
+        <a class="price-cta" href="#demo">Get started</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-cta">
+      <h3>Your next customer is one sentence away.</h3>
+      <button class="btn-primary" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Get started free</button>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Business Buddy!! — webpage created by Moin</span>
+      <div class="footer-links">
+        <a href="#pricing">Pricing</a>
+        <a href="#demo">Try it free</a>
+        <a href="mailto:hello@businessbuddy.app">hello@businessbuddy.app</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  var OUTPUT_DEFS = [
+    { key: "description", label: "Business description", detail: function(b){ return b + " Trusted, fast, and local."; } },
+    { key: "ads", label: "Google Ads headlines & descriptions", detail: function(b){ return "\"Fast, reliable help — call now\" · \"Trusted near you, open today\""; } },
+    { key: "instagram", label: "Instagram captions", detail: function(b){ return "We show up when you need us most. Save this post for the day you do. 📍"; } },
+    { key: "whatsapp", label: "WhatsApp promotional messages", detail: function(b){ return "Hi! We're running a quick offer this week — reply YES for details."; } },
+    { key: "offers", label: "Offers", detail: function(b){ return "First visit: 10% off. Refer a friend, both of you save."; } },
+    { key: "faq", label: "FAQ", detail: function(b){ return "How fast can you reach me? Usually within 30 minutes in your area."; } },
+    { key: "seo", label: "SEO keywords", detail: function(b){ return "near me, same day, trusted local, 24/7"; } },
+    { key: "website", label: "Website content", detail: function(b){ return "Homepage, About, and Services copy — written and ready to paste in."; } },
+    { key: "reviews", label: "Review-request messages", detail: function(b){ return "Glad we could help today! A quick review would mean a lot — link below."; } },
+    { key: "poster", label: "Poster text", detail: function(b){ return "Bold headline, contact number, and a one-line reason to call — print-ready."; } }
+  ];
+
+  // Build the static "what it generates" grid
+  (function buildOutputsGrid(){
+    var grid = document.getElementById('outputs-grid');
+    var subtitles = {
+      description: "The one paragraph that explains who you are",
+      ads: "Copy ready to paste into a campaign",
+      instagram: "Scroll-stopping, on-brand captions",
+      whatsapp: "Ready to send to your customer list",
+      offers: "A reason to book you over anyone else",
+      faq: "The questions customers actually ask",
+      seo: "What people type when they need you",
+      website: "Homepage and service page copy",
+      reviews: "Turns happy customers into public proof",
+      poster: "Print-ready text for your shop or van"
+    };
+    OUTPUT_DEFS.forEach(function(o){
+      var row = document.createElement('div');
+      row.className = 'out-row';
+      row.innerHTML = '<span class="out-led"></span><div class="out-text"><b>' + o.label + '</b><span>' + subtitles[o.key] + '</span></div>';
+      grid.appendChild(row);
+    });
+    var nextStep = document.createElement('div');
+    nextStep.className = 'out-row';
+    nextStep.innerHTML = '<span class="out-led"></span><div class="out-text"><b>Next steps for your business</b><span>A short, plain checklist of what to do first</span></div>';
+    grid.appendChild(nextStep);
+  })();
+
+  var lastToolkit = null;
+
+  function extractBizName(text){
+    var t = text.trim().replace(/\.$/, '');
+    var m = t.match(/own(?:s)? (?:an? )?([^,.]+?)(?: in ([A-Za-z ]+))?$/i);
+    if (m && m[1]) {
+      var kind = m[1].trim();
+      var place = m[2] ? m[2].trim() : null;
+      return { label: capitalize(kind), place: place, raw: t };
+    }
+    return { label: capitalize(t.length > 40 ? t.slice(0,40) + '…' : t), place: null, raw: t };
+  }
+  function capitalize(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  function generateToolkit(){
+    var input = document.getElementById('biz-input').value.trim();
+    if (!input) return;
+    var btn = document.getElementById('gen-btn');
+    var status = document.getElementById('gen-status');
+    var readout = document.getElementById('readout');
+    var pdfRow = document.getElementById('pdf-row');
+
+    btn.disabled = true;
+    status.textContent = 'generating…';
+    readout.classList.remove('show');
+    readout.innerHTML = '';
+    pdfRow.classList.remove('show');
+
+    var biz = extractBizName(input);
+    var bizLabel = biz.place ? (biz.label + ' in ' + biz.place) : biz.label;
+    document.getElementById('doc-mock-name').textContent = capitalize(biz.label);
+
+    var toolkit = {};
+    OUTPUT_DEFS.forEach(function(o){ toolkit[o.key] = o.detail(bizLabel); });
+    toolkit._bizLabel = bizLabel;
+    toolkit._input = input;
+    lastToolkit = toolkit;
+
+    setTimeout(function(){
+      OUTPUT_DEFS.forEach(function(o, i){
+        var row = document.createElement('div');
+        row.className = 'readout-row';
+        row.style.animationDelay = (i * 0.06) + 's';
+        row.innerHTML = '<span class="readout-dot"></span><div><b>' + o.label + '</b><span class="detail">' + toolkit[o.key] + '</span></div>';
+        readout.appendChild(row);
+      });
+      readout.classList.add('show');
+      status.textContent = '10 sections ready';
+      btn.disabled = false;
+      pdfRow.classList.add('show');
+    }, 550);
+  }
+
+  function downloadPdf(){
+    if (!lastToolkit) return;
+    var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : null;
+    if (!jsPDFCtor) { alert('PDF library did not load — please try again.'); return; }
+
+    var doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
+    var pageWidth = doc.internal.pageSize.getWidth();
+    var margin = 56;
+    var y = 64;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text(capitalize(lastToolkit._bizLabel), margin, y);
+    y += 18;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text('Toolkit report — generated from: "' + lastToolkit._input + '"', margin, y);
+    doc.setTextColor(20);
+    y += 30;
+
+    OUTPUT_DEFS.forEach(function(o){
+      if (y > 760) { doc.addPage(); y = 64; }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12.5);
+      doc.text(o.label, margin, y);
+      y += 16;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      var lines = doc.splitTextToSize(lastToolkit[o.key], pageWidth - margin * 2);
+      doc.text(lines, margin, y);
+      y += lines.length * 13 + 16;
+    });
+
+    if (y > 760) { doc.addPage(); y = 64; }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12.5);
+    doc.text('Next steps for your business', margin, y);
+    y += 16;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10.5);
+    var next = doc.splitTextToSize('1. Publish the website copy above. 2. Post the Instagram caption this week. 3. Send the WhatsApp message to your existing customers. 4. Print the poster text for your shop front.', pageWidth - margin * 2);
+    doc.text(next, margin, y);
+
+    var pageCount = doc.internal.getNumberOfPages();
+    for (var p = 1; p <= pageCount; p++) {
+      doc.setPage(p);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(150);
+      doc.text('Generated by Business Buddy!!', margin, 812);
+    }
+
+    doc.save((lastToolkit._bizLabel || 'business').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0,40) + '-toolkit.pdf');
+  }
+</script>
+
+</body>
+</html>
